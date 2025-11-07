@@ -1,9 +1,5 @@
-// Datos de ejemplo de solicitudes
-const requests = [
-  { id:1, name:'Carlos Rocha', initials:'CR', start:'2025-11-04T06:00:00.000Z', end:'2025-11-05T06:00:00.000Z', days:1, accumulated:0, status:'pending' },
-  { id:2, name:'Josué David Espinoza Salgado', initials:'JD', start:'2025-11-04T06:00:00.000Z', end:'2025-11-04T06:00:00.000Z', days:1, accumulated:0, status:'approved' },
-  { id:3, name:'David Espinoza', initials:'DE', start:'2025-11-10T06:00:00.000Z', end:'2025-11-12T06:00:00.000Z', days:1, accumulated:0, status:'rejected' }
-];
+// requests will be loaded from server API
+let requests = [];
 
 const container = document.getElementById('requestsContainer');
 const tabs = Array.from(document.querySelectorAll('.tab'));
@@ -100,11 +96,24 @@ function renderList(status){
 function updateStatus(id, newStatus){
   const idx = requests.findIndex(r=>r.id===id);
   if(idx===-1) return;
-  requests[idx].status = newStatus;
-  // re-render current active tab
-  const active = tabs.find(t=>t.classList.contains('active'));
-  renderCounts();
-  renderList(active ? active.dataset.status : 'pending');
+  // call server
+  API.updateRequest({ id, status: newStatus }).then(res => {
+    if(res && res.id){
+      // update local copy using returned row
+      requests[idx] = Object.assign({}, requests[idx], res);
+    } else {
+      requests[idx].status = newStatus; // fallback
+    }
+    const active = tabs.find(t=>t.classList.contains('active'));
+    renderCounts();
+    renderList(active ? active.dataset.status : 'pending');
+  }).catch(()=>{
+    // on error, still update locally so UI feels responsive
+    requests[idx].status = newStatus;
+    const active = tabs.find(t=>t.classList.contains('active'));
+    renderCounts();
+    renderList(active ? active.dataset.status : 'pending');
+  });
 }
 
 // tab switching
@@ -116,6 +125,15 @@ tabs.forEach(t=>{
   });
 });
 
-// init
-renderCounts();
-renderList('pending');
+// init: load from server
+API.getRequests().then(arr => {
+  // server returns array of requests
+  requests = Array.isArray(arr) ? arr : [];
+  renderCounts();
+  const active = tabs.find(t=>t.classList.contains('active'));
+  renderList(active ? active.dataset.status : 'pending');
+}).catch(()=>{
+  // fallback: keep empty
+  renderCounts();
+  renderList('pending');
+});
