@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Gestión de Vacaciones</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+    .login-card{width:420px;background:var(--card);padding:28px;border-radius:10px;box-shadow:0 8px 30px rgba(12,20,40,0.06);text-align:center}
+    .login-card h1{font-family:serif;margin-bottom:6px}
+    .login-card .logo{height:84px;margin-bottom:8px}
+    .form-row{margin-top:12px;text-align:left}
+    .form-row label{display:block;font-weight:700;margin-bottom:6px}
+    .form-row input{width:100%;padding:10px;border-radius:8px;border:1px solid #eee}
+    .login-btn{margin-top:14px;background:#17284a;color:#fff;padding:10px;border-radius:8px;border:none;width:100%;cursor:pointer}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="" alt="logo" class="logo" style="display:block;margin:0 auto 8px auto"> 
+    <h1>Gestión de Vacaciones</h1>
+    <div class="muted">Cooperativa San Antonio - COOPEFACSA R.L</div>
+
+    <form id="loginForm" style="margin-top:18px">
+      <div class="form-row">
+        <label for="email">Correo Electrónico</label>
+        <input id="email" type="email" placeholder="tu.nombre@coopefacsa.coop.ni" required>
+      </div>
+      <div class="form-row">
+        <label for="password">Contraseña <a href="#" style="float:right;font-size:13px">¿Olvidaste tu contraseña?</a></label>
+        <input id="password" type="password" required>
+      </div>
+      <button class="login-btn" type="submit">Iniciar Sesión</button>
+    </form>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
