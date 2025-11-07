@@ -1,10 +1,5 @@
-// Datos de ejemplo del equipo
-let team = [
-  { id:1, name:'Carlos Rocha', role:'Encargado de Informática', dept:'Informática', acumulados:40, usados:11, pendientes:4, status:'Activo' },
-  { id:2, name:'David Espinoza', role:'Auxiliar de Informática', dept:'Informática', acumulados:40, usados:21, pendientes:23, status:'Activo' },
-  { id:3, name:'Josué David Espinoza Salgado', role:'Auxiliar de Informática', dept:'Informática', acumulados:40, usados:21, pendientes:19, status:'Activo' }
-];
-
+// team loaded from server
+let team = [];
 const teamList = document.getElementById('teamList');
 const searchEl = document.getElementById('search');
 const deptFilter = document.getElementById('departmentFilter');
@@ -80,9 +75,17 @@ function renderList(){
     delBtn.textContent = 'Eliminar';
     delBtn.addEventListener('click', ()=>{
       if(confirm('Eliminar colaborador: ' + t.name + '?')){
-        team = team.filter(x=>x.id!==t.id);
-        renderFilters();
-        renderList();
+        // call server API to delete
+        API.deleteTeam({ id: t.id }).then(res => {
+          team = team.filter(x=>x.id!==t.id);
+          renderFilters();
+          renderList();
+        }).catch(()=>{
+          // fallback local
+          team = team.filter(x=>x.id!==t.id);
+          renderFilters();
+          renderList();
+        });
       }
     });
 
@@ -105,12 +108,30 @@ addBtn.addEventListener('click', ()=>{
   if(!name) return;
   const role = prompt('Cargo:','');
   const dept = prompt('Departamento:','');
-  const id = Math.max(0,...team.map(t=>t.id)) + 1;
-  team.push({ id, name, role, dept: dept||'Sin asignar', acumulados:40, usados:0, pendientes:0, status:'Activo' });
+  const payload = { name, role, dept: dept||'Sin asignar', acumulados:40, usados:0, pendientes:0, status:'Activo' };
+  API.addTeam(payload).then(res => {
+    // res should contain the created row with id
+    const created = res || payload;
+    team.push(created);
+    renderFilters();
+    renderList();
+  }).catch(()=>{
+    // fallback: local creation
+    const id = Math.max(0,...team.map(t=>t.id)) + 1;
+    payload.id = id;
+    team.push(payload);
+    renderFilters();
+    renderList();
+  });
+});
+
+// Inicializar: cargar desde server
+API.getTeam().then(arr => {
+  team = Array.isArray(arr) ? arr : [];
+  renderFilters();
+  renderList();
+}).catch(()=>{
+  team = [];
   renderFilters();
   renderList();
 });
-
-// Inicializar
-renderFilters();
-renderList();
